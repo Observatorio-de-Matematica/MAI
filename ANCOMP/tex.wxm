@@ -1,0 +1,89 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 22.04.0 ] */
+/* [wxMaxima: input   start ] */
+P(n):=(block([],
+    if n=0 then 
+        return(1),
+    return(ev(P(n-1)+x^(2^(n-1))*Q(n-1), expand))
+    ))$
+Q(n):=(block([],
+    if n=0 then 
+        return(1),
+    return(ev(P(n-1)-x^(2^(n-1))*Q(n-1), expand))
+    ))$
+toTex(x):=(tex(x, false))$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+PrintFormule(out, form):=(block([len, count, st],
+        len:slength(form),
+        count:0,
+        for i:1 thru len step 1 do(
+            if charat(form, i) = "}" then(
+                /*print("here", i),*/
+                count:count+1
+            ),
+            printf(out, charat(form, i)),
+            if count > 8 then(
+                printf(out, "\\\\"),
+                count:0
+            )
+        )
+    ))$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/*set_tex_environment_default ("\\begin{multline*}
+  ", "
+  \\end{multline*}");*/
+  out: openw("./out.tex")$
+  printf(out, "\\documentclass[12pt]{article}
+  
+  \\usepackage{fullpage}
+  \\usepackage{ulem}
+  \\usepackage[utf8]{inputenc}
+  \\usepackage[russian]{babel}
+  \\usepackage{graphicx}
+  \\usepackage{float}
+  \\usepackage{amsmath}
+      
+  \\begin{document}
+  
+  \\section*{Многочлены Шапиро}
+  Многочлены Шапиро — поседовательность многочленов, впервые изученная Гарольдом Шапиро в 1951 году при рассмотрении величин некоторых специальных тригонометрических сумм. С точки зрения обработке сигналов, полиномы Шапиро обладают хорошими автокорреляционными свойствами, и их значения в единичном круге малы.
+  \\subsection*{Первые 5 многочленов}")$
+  
+  for i:1 thru 6 step 1 do(
+      p:P(i),
+      plot2d([p, diff(p, x)], [x,-5,5],
+   [plot_format, gnuplot],
+   [nticks,20],
+      [gnuplot_term, eps],[gnuplot_out_file, sconcat("./", i, ".eps")],
+      [legend, "многочлен", "производная"]),
+          printf(out, sconcat(i, "-й многочлен: ")),
+          pol:toTex(p),
+          der:toTex(diff(p, x)),
+          printf(out, pol),
+          /*PrintFormule(out, pol),*/
+          printf(out, "его производная: "),
+          printf(out, der),
+          /*PrintFormule(out, der),*/
+          printf(out, sconcat("\\begin{figure}[H]
+    \\caption{",i,"-й многочлен}
+    \\centering
+         \\includegraphics[width=\\linewidth]{", i,".eps}
+  \\end{figure}"))
+      );
+  
+  printf(out, "\\end{document}")$
+
+
+
+/* [wxMaxima: input   end   ] */
+
+
+
+/* Old versions of Maxima abort on loading files that end in a comment. */
+"Created with wxMaxima 22.04.0"$

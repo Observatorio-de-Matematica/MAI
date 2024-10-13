@@ -1,0 +1,343 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 22.04.0 ] */
+/* [wxMaxima: input   start ] */
+print("#1")$
+func([l]):=block([mult, sum, len],
+            len:length(l),
+            mult:1,
+            sum:0,
+            for i:2 thru len step 2 do mult:mult*l[i],
+            for i:1 thru len step 2 do sum:sum+l[i],       
+            return([sum, mult])
+)$
+func(1, 2, 3, 4, 5,8);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+print("#2")$
+getGeneralEquation(eq):=(block([l, r, lx, ly, rx, ry, a1, a2, x1, y1],
+        if listp(eq) then(
+                /*print("@5"),*/
+                rx:rhs(eq[1]),
+                ry:rhs(eq[2]),
+                
+                if lhs(eq[1])=y then(
+                    rx:rhs(eq[2]),
+                    ry:rhs(eq[2])
+                ),
+            
+                a1:coeff(rx, t),
+                a2:coeff(ry, t),
+            
+                x1:ev(rx, t=0),
+                y1:ev(ry, t=0),
+                
+                if not a2 = 0 then
+                    return(a1/a2*y-x-a1/a2*y1+x1=0)
+                else if not a1 = 0 then
+                    return(y-a2/a1*x+a2/a1*x1-y1=0),
+                return(0)
+        ),
+        
+        l:lhs(eq),
+        r:rhs(eq),
+        lx:coeff(l, x),
+        ly:coeff(l, y),
+        rx:coeff(r, x),
+        ry:coeff(r, y),
+        
+        if r = 0 then(
+            /*print("@1"),*/
+            return(eq)
+        ),
+        
+        if r = 1 then(
+            /*print("@2"),*/
+            return(l - 1 = 0)
+        ),
+        
+        if ly = 1 then(
+            /*print("@3"),*/
+            return(l - r = 0)
+        ),
+        
+        /*print("@4"),*/
+        return(ev(l*denom(r)*denom(l)-r*denom(l)*denom(r)=0, ratsimp))
+    ))$
+
+getNormalEquation(eq):=(block([l, A, B, C, N, RES],
+       eq:getGeneralEquation(eq),
+        l:lhs(eq),
+        A:coeff(l,x),
+        B:coeff(l,y),
+        C:ev(l, x=0, y=0),
+        N:1/sqrt(A^2+B^2),
+        RES:ev(l*N, expand),
+        if C >= 0 then
+            return(-RES=0)
+        else
+            return(RES=0)
+    ))$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+getNormalEquation(x=0);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+print("#3")$
+relPosition(eq1, eq2):=(block([l1, l2, A1, A2, B1, B2, C1, C2, py, px, RES, point, angle],
+    l1:lhs(getNormalEquation(eq1)),
+    l2:lhs(getNormalEquation(eq2)),
+        /*print(l1, "___", l2),*/
+    A1:coeff(l1,x),
+    A2:coeff(l2,x),
+    if A1<0 then
+        l1:-l1,
+     if A2<0 then
+        l2:-l2,
+        /*print(l1, "___", l2),*/
+    A1:coeff(l1,x),
+    A2:coeff(l2,x),
+    B1:coeff(l1,y),
+    B2:coeff(l2,y),
+    C1:ev(l1, x=0, y=0),
+    C2:ev(l2, x=0, y=0),
+  
+    if A1 = A2 and B1 = B2 then(
+            if C1 = C2 then(
+                    print("match"),
+                    return([0])
+            ),
+        print("parallel"),
+        
+        RES:abs(C2-C1),
+        return([RES])
+    ),
+    print("intersect"),
+    point:linsolve([l1, l2], [x,y]),
+    angle:ev(acos(abs(A1*A2+B1*B2)), simp),
+    return([point, angle])
+))$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+relPosition(x-3*y+2=0,x-3*y-4=0);
+relPosition([x=4*t+5, y=-7*t+1], x-3*y-4=0);
+relPosition(x=0, x-3=0);
+relPosition([x=t, y=t], x-3=0);
+
+
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+print("#4")$
+getDirVec(line):=(block([A1, B1, C1, A2, B2, C2, px, py, pz, S, l1, l2, M, p1, p2, p3],    
+    A1:coeff(lhs(line[1]), x),
+    A2:coeff(lhs(line[2]), x),
+    B1:coeff(lhs(line[1]), y),
+    B2:coeff(lhs(line[2]), y),
+    C1:coeff(lhs(line[1]), z),
+   C2:coeff(lhs(line[2]), z),
+    /*px:0,
+    l1: line[1],
+    l2: line[2],
+    S:linsolve([ev(l1, x=px), ev(l2, x=px)],[y,z]),
+    py:rhs(S[1]),
+    pz:rhs(S[2]),*/
+    M:matrix([i, j, k],[A1, B1, C1],[A2, B2, C2]),
+    D:determinant(M),
+    p1:coeff(D, i),
+    p2:coeff(D, j),
+    p3:coeff(D, k),
+    return([p1, p2, p3])
+))$
+
+getPoint(line):=(block([sx, sy, zz, S, vars],    
+    S:linsolve(line, [x, y, z]),
+    sx:rhs(S[1]),
+    sy:rhs(S[2]),
+    sz:rhs(S[3]),
+    vars:append(listofvars(sx), listofvars(sy), listofvars(sz)),
+    vars:unique(vars),
+    return([ev(sx, vars[1]=0), ev(sy, vars[1]=0), ev(sz, vars[1]=0)])
+))$
+
+normalize(plane):=(block([l,N, RES, A, B, C],
+        l:lhs(plane),
+        A:coeff(l, x),
+        B:coeff(l, y),
+        C:coeff(l, z),
+        D:ev(l, x=0, y=0, z=0),
+        N:1/sqrt(A^2+B^2+C^2),
+        RES:ev(l*N, expand),
+        if D >= 0 then
+            return(-RES=0)
+        else
+            return(RES=0)
+    ))$
+
+getDist(line, plane):=(block([pt, pl],    
+    pt:getPoint(line),
+    pl:normalize(plane),
+    return(abs(ev(lhs(pl), x=pt[1], y=pt[2], z=pt[3])))
+))$
+
+relPos3D(line, plane):=(block([p, S],
+        plane:normalize(plane),
+        p:getDirVec(line),
+        pt:getPoint(line),
+        pl:lhs(plane),
+        A:coeff(pl, x),
+        B:coeff(pl, y),
+        C:coeff(pl, z),
+        D:ev(pl, x-0, y=0, z=0),
+        
+        dot: A*p[1] + B*p[2] + C*p[3],
+        /*print("dot", dot),*/
+        
+        T:matrix([x-pt[1], y-pt[2], z-pt[3]], [A, B, C], p),
+        D:ev(determinant(T), expand),
+        proj:[plane, D=0],
+        
+        if dot = 0 then(
+                if ev(pl, x=pt[1], y=pt[2], z=pt[3]) = 0 then(
+                    print("match"),
+                    return([0, proj])
+                )
+                else(
+                    print("parallel"),
+                    return([getDist(line, plane), proj])
+                )
+        )
+        else(
+            print("intersect"),
+            /*print(plane, line[1], line[2]),*/
+            S:linsolve([plane, line[1], line[2]], [x, y, z]),
+            point:[rhs(S[1]), rhs(S[2]), rhs(S[3])],
+            angle:asin(abs(A*p[1]+B*p[2]+C*p[3])),
+            return([point, angle, proj])
+        )
+))$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/*normalize(4*x+5*y-6*z+17=0);
+getPoint([2*x-y+3*z+4=0, x+5*y-3*z-7=0]);
+getPoint([-4*x-y + 3=0, 2*x+z + 2=0]);
+getDist([2*x-y+3*z+4=0, x+5*y-3*z-7=0], 4*x+5*y-6*z+17=0);*/
+
+relPos3D([2*x-y+3*z+4=0, x+5*y-3*z-7=0], 4*x=0);
+relPos3D([2*x-y+3*z+4=0, 6*x+5*y-9*z-7=0], 4*x=0);
+relPos3D([x+1=0, 3*x+y+3=0], x+3=0);
+relPos3D([x=0, y+3=0], x+8*y-z+4=0);
+relPos3D([x-y-z=0, x-2=0], x+8*y-z+4=0);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+print("#5")$
+getPointProj(point, plane):=(block([A,B,C, S, T],
+        l:lhs(plane),
+        A:coeff(l, x),
+        B:coeff(l, y),
+        C:coeff(l, z),
+        S:solve(ev(plane, x=A*t+point[1],y=B*t+point[2],z=C*t+point[3]), [t]),
+        T:rhs(S[1]),
+        /*print(T),*/
+        return([A*T+point[1],B*T+point[2],C*T+point[3]])
+))$
+
+relPointPos(point, planes):=(block([S, p1, p2, P1, P2, A1, B1, C1, D1, A2, B2, C2, D2, d1, d2],
+        if ev(planes[1], x=point[1], y=point[2], z=point[3]) and ev(planes[2], x=point[1], y=point[2], z=point[3]) then(
+            print("given point is the intersection line of given planes"),
+            return()
+        ),
+        print("plane1:",ev(planes[1], x=point[1], y=point[2], z=point[3])),
+        print("plane2:",ev(planes[2], x=point[1], y=point[2], z=point[3])),
+        if ev(planes[1], x=point[1], y=point[2], z=point[3]) then(
+            print("given point lies into the first plane")
+        )
+        else if ev(planes[2], x=point[1], y=point[2], z=point[3]) then(
+            print("given point lies into the second plane")
+        )
+        else(
+             print("given point lies betwen given planes")
+        ),
+        
+        p1:getPointProj(point, planes[1]),
+        p2:getPointProj(point, planes[2]),
+        
+        print("point",point, "projected onto 1st plane:", p1),
+        print("point",point, "projected onto 2nd plane:", p2),
+        
+        P1:lhs(planes[1]),
+        P2:lhs(planes[2]),
+        
+        A1:coeff(P1, x),
+         B1:coeff(P1, y),
+         C1:coeff(P1, z),
+         A2:coeff(P2, x),
+         B2:coeff(P2, y),
+         C2:coeff(P2, z),
+        
+        d1:(point[1]-p1[1])*A1 + (point[2]-p1[2])*B1+ (point[3]-p1[3])*C1,
+        d2:(point[1]-p2[1])*A2 + (point[2]-p2[2])*B2+ (point[3]-p2[3])*C2,
+        
+        print("point",point), 
+        if d1>0 then(
+             print("is above the 1st plane")
+        )
+        else if d1<0 then(
+             print("is below the 1st plane")
+        ),
+        print("point",point), 
+         if d2>0 then(
+             print("is above the 2nd plane")
+        )
+        else if d2<0 then(
+             print("is below the 2nd plane")
+        )
+))$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/*getPointProj([1,5,3], 4*x+5*y-6*z+17=0);*/
+/*relPointPos([1, 5, -3], [4*x+5*y-6*z+17=0, x-19*y+6*z+4=0])$
+relPointPos([-179/77,65/77,153/77], [4*x+5*y-6*z+17=0, x-19*y+6*z+4=0])$
+relPointPos([253/199,-31/199,-273/199], [4*x+5*y-6*z+17=0, x-19*y+6*z+4=0])$
+relPointPos([0, 0, 3], [x+y=0, x+z-3=0])$*/
+relPointPos([1,1,1], [x-1=0, y-2=0])$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/*S:linsolve([x+1=0, 3*x+y+3=0], [x, y, z]);
+sx:rhs(S[1]);
+sy:rhs(S[2]);
+sz:rhs(S[3]);
+vars:append(listofvars(sx), listofvars(sy), listofvars(sz));
+vars:unique(vars);
+RES:[ev(sx, vars[1]=0), ev(sy, vars[1]=0), ev(sz, vars[1]=0)];*/
+
+/*getPoint([x+y+z+1=0, 3*x+y+3=0]);
+getPoint([x+y+z+1=0, 8*z+5*x+y+3=0]);*/;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/*getGeneralEquation([x=5,y=1-7*t]);
+getGeneralEquation([x=5*t+6,y=1]);*/;
+/* [wxMaxima: input   end   ] */
+
+
+
+/* Old versions of Maxima abort on loading files that end in a comment. */
+"Created with wxMaxima 22.04.0"$

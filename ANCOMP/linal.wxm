@@ -1,0 +1,195 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 22.04.0 ] */
+/* [wxMaxima: input   start ] */
+3.9$
+
+ex1:2*x_1+3*x_2+3*x_3-3*x_4-x_5=0$
+ex2:x_1+6*x_2-x_3+x_4+2*x_5=0$
+ex3:x_1+16*x_2-6*x_3+6*x_4+7*x_5=0$
+linsolve([ex1,ex2,ex3],[x_1,x_2,x_3,x_4,x_5]);
+
+A:matrix(
+    [2, 3, 3, -3, -1],
+    [1, 6, -1, 1, 2],
+    [1, 16, -6, 6, 7]);
+r:rank(A)$ 
+d:5-r;
+
+x:matrix([x_1,x_2,x_3,x_4,x_5])$
+M:echelon(A);
+x3:solve(x.transpose(row(M,3)),x_3);
+x.transpose(row(M,2)), x3[1]$
+x2:solve(% ,x_2);
+x.transpose(row(M,1)), x2[1], x3[1]$
+x1:solve(%, x_1);
+
+x1_1:x1, x_4=1, x_5=0$
+x2_1:x2, x_4=1, x_5=0$
+x3_1:x3, x_4=1, x_5=0$
+
+x1_2:x1, x_4=0, x_5=1$
+x2_2:x2, x_4=0, x_5=1$
+x3_3:x3, x_4=0, x_5=1$
+
+ans1:transpose(matrix([ev(x_1, x1_1), ev(x_2, x2_1), ev(x_3, x3_1), 1, 0]))$
+ans2:transpose(matrix([ev(x_1, x1_2), ev(x_2, x2_2), ev(x_3, x3_2), 0, 1]))$
+
+print("ФСР:",ans1, ans2)$
+
+X:C_1*ans1+C_2*ans2+C_3*ans3;
+
+print("--------------------------")$
+
+ex1:x_1-2*x_2+2*x_3+3*x_4=0$
+ex2:3*x_1-5*x_2+x_3+4*x_4=1$
+ex3:2*x_1-3*x_2-x_3+x_4=1$
+
+linsolve([ex1,ex2,ex3],[x_1,x_2,x_3,x_4,x_5]);
+
+A:matrix(
+    [1, -2, 2, 3, 0],
+    [3, -5, 1, 4, 1],
+    [2, -3, -1, 1, 1]);
+r:rank(A)$ d:5-r;
+
+x:matrix([x_1,x_2,x_3,x_4, 1])$
+M:echelon(A);
+
+x2:solve(x.transpose(row(M,2)),x_2);
+x.transpose(row(M,1)), x2[1]$
+x1:solve(%,x_1);
+
+ch1:x1, x_3=0, x_4=0$
+ch2:x2, x_3=0, x_4=0$
+
+ch:transpose(matrix([ev(x_1, ch1), ev(x_2, ch2), 0, 0]))$
+
+print("Частное решение:", ch)$
+
+x0: matrix([x_1,x_2,x_3,x_4, 0])$
+
+x20:solve(x0.transpose(row(M,2)),x_2);
+x0.transpose(row(M,1)), x20[1]$
+x10:solve(%,x_1);
+
+x1_1: x10, x_3=0, x_4=1$
+x2_1: x20, x_3=0, x_4=1$
+
+x1_2: x10, x_3=1, x_4=0$
+x2_2: x20, x_3=1, x_4=0$
+
+ans1:transpose(matrix([ev(x_1, x1_1), ev(x_2, x2_1), 0, 1]))$
+ans2:transpose(matrix([ev(x_1, x1_2), ev(x_2, x2_2), 1, 0]))$
+
+print("ФСР:", ans1, ans2)$
+
+X: ch + C_1*ans1 + C_2*ans2;
+
+
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+4.9$
+x:transpose(matrix([10,5,1]));
+E:matrix(
+    [1, 6, -1],
+    [1, -1, 1],
+    [6/5, 0, 1]);
+not(determinant(E) = 0);
+invert(E).x;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+5.9$
+
+Ax:matrix(
+[2*x_1-x_2, x_3, x_1+2*x_2+3*x_3^4]);
+Aαx: Ax*α$
+αAx: Ax, x_1=α*x_1, x_2=α*x_2, x_3=α*x_3$
+not(Aαx = αAx);
+print("Преобразование нелинейно")$
+
+Bx:matrix(
+[2*x_1-x_2, x_3, x_1+2*x_2+3*x_3]);
+Bαx: expand(Bx*α);
+αBx: Bx, x_1=α*x_1, x_2=α*x_2, x_3=α*x_3;
+not(Bαx = αBx);
+print("Преобразование возможно линейно")$
+
+By:matrix(
+[5*y_1-4*y_2-3*y_3,2*y_1-y_2,y_3]);
+A:Bx+By$
+Bx, x_1 = x_1+y_1, x_2 = x_2+y_2, x_3 = x_3+y_3$
+B:expand(%)$
+not(A=B);
+print("Преобразование линейно")$
+
+Cx:matrix(
+[2*x_1-x_2, 1, x_1+2*x_2+3]);
+Cαx: expand(Cx*α)$
+αCx: Cx, x_1=α*x_1, x_2=α*x_2, x_3=α*x_3$
+not(Cαx = αCx);
+print("Преобразование нелинейно")$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+7.9$
+
+S:matrix(
+[1,-1,-1],
+[-1,1,2],
+[1,-2,1]);
+
+S1:invert(S);
+A:matrix(
+[0, 1, 2],
+[4, 0, 1],
+[-1, -2, 1]);
+
+S1.(A.S);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+9.9$
+
+A:matrix(
+[4, 1, 0],
+[1, 4, 0],
+[-1, 1, 5]);
+
+eigenvalues(A);
+eigenvectors(A);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+11.9$
+A:matrix(
+[-1, -1, -3],
+[-1, -1, 3],
+[-3, 3, -3]);
+
+vecs:eigenvectors(A)[2]$
+
+S: matrix(
+    vecs[1][1],
+    vecs[2][1],
+    vecs[3][1]);
+
+ST:transpose(S);
+
+RES: S.A.ST;
+
+cv:RES[1,1]*x_1^2 +  RES[2,2]*x_2^2 + RES[3,3]*x_3^2$
+print("Приведенная квадратичная форма: ", cv)$
+
+/* [wxMaxima: input   end   ] */
+
+
+
+/* Old versions of Maxima abort on loading files that end in a comment. */
+"Created with wxMaxima 22.04.0"$
